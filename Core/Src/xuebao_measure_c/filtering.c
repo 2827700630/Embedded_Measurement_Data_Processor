@@ -77,9 +77,10 @@ float MovingAverageFilter_Update(MovingAverageFilter *filter, float new_value)
 // --- 中值滤波器实现 ---
 
 // qsort 的比较函数 (升序)
-static int compare_float(const void *a, const void *b) {
-    float fa = *(const float*) a;
-    float fb = *(const float*) b;
+static int compare_float(const void *a, const void *b)
+{
+    float fa = *(const float *)a;
+    float fb = *(const float *)b;
     return (fa > fb) - (fa < fb);
 }
 
@@ -90,8 +91,10 @@ static int compare_float(const void *a, const void *b) {
  * @param sorted_buffer 指向用于排序的临时缓冲区的指针 (大小必须与 buffer 相同)
  * @param size 滤波器窗口大小 (缓冲区大小)
  */
-void MedianFilter_Init(MedianFilter *filter, float *buffer, float *sorted_buffer, uint16_t size) {
-    if (filter == NULL || buffer == NULL || sorted_buffer == NULL || size == 0) {
+void MedianFilter_Init(MedianFilter *filter, float *buffer, float *sorted_buffer, uint16_t size)
+{
+    if (filter == NULL || buffer == NULL || sorted_buffer == NULL || size == 0)
+    {
         return;
     }
     filter->buffer = buffer;
@@ -101,7 +104,8 @@ void MedianFilter_Init(MedianFilter *filter, float *buffer, float *sorted_buffer
     filter->is_full = 0;
 
     // 清空缓冲区
-    for (uint16_t i = 0; i < size; ++i) {
+    for (uint16_t i = 0; i < size; ++i)
+    {
         filter->buffer[i] = 0.0f;
     }
 }
@@ -112,8 +116,10 @@ void MedianFilter_Init(MedianFilter *filter, float *buffer, float *sorted_buffer
  * @param new_value 新的测量值
  * @return 滤波后的值 (中值)
  */
-float MedianFilter_Update(MedianFilter *filter, float new_value) {
-    if (filter == NULL || filter->buffer == NULL || filter->sorted_buffer == NULL || filter->size == 0) {
+float MedianFilter_Update(MedianFilter *filter, float new_value)
+{
+    if (filter == NULL || filter->buffer == NULL || filter->sorted_buffer == NULL || filter->size == 0)
+    {
         return new_value; // Error
     }
 
@@ -122,7 +128,8 @@ float MedianFilter_Update(MedianFilter *filter, float new_value) {
 
     // 更新索引
     filter->index++;
-    if (filter->index >= filter->size) {
+    if (filter->index >= filter->size)
+    {
         filter->index = 0;
         filter->is_full = 1; // 缓冲区现在满了
     }
@@ -130,9 +137,10 @@ float MedianFilter_Update(MedianFilter *filter, float new_value) {
     uint16_t current_count = filter->is_full ? filter->size : filter->index;
 
     // 如果只有一个元素，直接返回
-    if (current_count == 0) return new_value; // Should not happen if called after Init
-    if (current_count == 1) return filter->buffer[0];
-
+    if (current_count == 0)
+        return new_value; // Should not happen if called after Init
+    if (current_count == 1)
+        return filter->buffer[0];
 
     // 复制数据到排序缓冲区
     memcpy(filter->sorted_buffer, filter->buffer, current_count * sizeof(float));
@@ -141,10 +149,13 @@ float MedianFilter_Update(MedianFilter *filter, float new_value) {
     qsort(filter->sorted_buffer, current_count, sizeof(float), compare_float);
 
     // 找到中值
-    if (current_count % 2 == 1) {
+    if (current_count % 2 == 1)
+    {
         // 奇数个元素，中值是中间的那个
         return filter->sorted_buffer[current_count / 2];
-    } else {
+    }
+    else
+    {
         // 偶数个元素，中值是中间两个元素的平均值
         float mid1 = filter->sorted_buffer[current_count / 2 - 1];
         float mid2 = filter->sorted_buffer[current_count / 2];
@@ -159,16 +170,23 @@ float MedianFilter_Update(MedianFilter *filter, float new_value) {
  * @param filter 指向滤波器结构体的指针
  * @param alpha 平滑因子 (0 < alpha <= 1). 值越小越平滑，对噪声抑制越好，但响应越慢.
  */
-void EWMAFilter_Init(EWMAFilter *filter, float alpha) {
-    if (filter == NULL) {
+void EWMAFilter_Init(EWMAFilter *filter, float alpha)
+{
+    if (filter == NULL)
+    {
         return;
     }
     // Clamp alpha to (0, 1]
-    if (alpha <= 0.0f) {
+    if (alpha <= 0.0f)
+    {
         filter->alpha = 0.01f; // Set a minimum default alpha if invalid
-    } else if (alpha > 1.0f) {
+    }
+    else if (alpha > 1.0f)
+    {
         filter->alpha = 1.0f;
-    } else {
+    }
+    else
+    {
         filter->alpha = alpha;
     }
     filter->last_ewma = 0.0f;
@@ -181,16 +199,21 @@ void EWMAFilter_Init(EWMAFilter *filter, float alpha) {
  * @param new_value 新的测量值
  * @return 滤波后的值
  */
-float EWMAFilter_Update(EWMAFilter *filter, float new_value) {
-    if (filter == NULL) {
+float EWMAFilter_Update(EWMAFilter *filter, float new_value)
+{
+    if (filter == NULL)
+    {
         return new_value; // Error
     }
 
-    if (!filter->initialized) {
+    if (!filter->initialized)
+    {
         // 第一次更新，直接使用新值作为初始 EWMA 值
         filter->last_ewma = new_value;
         filter->initialized = 1;
-    } else {
+    }
+    else
+    {
         // EWMA 公式: Y_t = alpha * X_t + (1 - alpha) * Y_{t-1}
         filter->last_ewma = filter->alpha * new_value + (1.0f - filter->alpha) * filter->last_ewma;
     }

@@ -20,18 +20,19 @@ float Lagrange_Interpolate(float x, const float *x_values, const float *y_values
 // --- 三次样条插值 ---
 // 这是一个简化版的三次样条插值实现，使用自然样条（边界二阶导数为0）
 // 注意：这个函数需要一个临时缓冲区来存储计算的中间结果
-typedef struct {
-    float *a;       // 系数 a (实际上是 y 值)
-    float *b;       // 系数 b 
-    float *c;       // 系数 c
-    float *d;       // 系数 d
-    float *h;       // 步长 h_i = x_{i+1} - x_i
-    uint16_t n;     // 区间数量（n = 数据点数量 - 1）
+typedef struct
+{
+    float *a;   // 系数 a (实际上是 y 值)
+    float *b;   // 系数 b
+    float *c;   // 系数 c
+    float *d;   // 系数 d
+    float *h;   // 步长 h_i = x_{i+1} - x_i
+    uint16_t n; // 区间数量（n = 数据点数量 - 1）
 } CubicSpline;
 
 // 初始化三次样条插值
 // 返回0表示成功，-1表示失败
-int CubicSpline_Init(CubicSpline *spline, const float *x_values, const float *y_values, 
+int CubicSpline_Init(CubicSpline *spline, const float *x_values, const float *y_values,
                      uint16_t num_points, float *work_buffer);
 
 // 使用三次样条插值计算值
